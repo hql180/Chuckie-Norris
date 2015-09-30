@@ -89,6 +89,10 @@ var STATE_GAMEOVER = 2;
 var player = new Player();
 var keyboard = new Keyboard();
 
+//sound variables
+var musicBackground;
+var sfxFire;
+
 // loading tileset image for use
 var tileset = document.createElement("img");
 tileset.src = "tileset.png";
@@ -125,6 +129,27 @@ function initialize()
 			}
 		}
 	}
+	
+	// sound stuff
+	musicBackground = new Howl(
+	{
+		urls: ["background.oog"],
+		leep: true,
+		buffer: true,
+		volume: .5
+	});
+	musicBackground.play();
+	
+	sfxFire = new Howl(
+	{
+		urls: ["fireEffect.ogg"],
+		buffer: true,
+		volume: 1,
+		onend: function() 
+		{
+			isSfxPlaying = false;
+		}
+	});
 }
 
 // checks to see if on or off screen
