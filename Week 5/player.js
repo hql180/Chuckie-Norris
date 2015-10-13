@@ -31,7 +31,7 @@ var Player = function()
 			[65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78]);
 	this.sprite.buildAnimation(12, 8, 165, 126, 0.05,
 			[27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41]);
-	this.sprite.buildAnimation(12, 8, 165, 126, 0.05,
+	this.sprite.buildAnimation(12, 8, 165, 126, .05,
 			[79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93]);
 			
 	for(var i=0; i<ANIM_MAX; i++)
@@ -143,7 +143,7 @@ Player.prototype.update = function(deltaTime)
 	}
 	if (shoot)
 	{
-		if(this.direction == LEFT && this.sprite.currentAnimation != ANIM_SHOOT_LEFT)
+		if(this.direction == LEFT)
 			this.sprite.setAnimation(ANIM_SHOOT_LEFT);
 		else
 			this.sprite.setAnimation(ANIM_SHOOT_RIGHT);
