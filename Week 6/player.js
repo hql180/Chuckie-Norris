@@ -52,8 +52,6 @@ var Player = function()
 	
 	this.direction = LEFT;
 	
-	this.alive = true;
-	
 	// shoot timer
 	this.cooldownTimer = 0;
 };
@@ -126,7 +124,7 @@ Player.prototype.update = function(deltaTime)
 	
 	if (left)
 		ddx = ddx - ACCEL;
-	else if (wasleft)
+	else if (wasright)
 		ddx = ddx + FRICTION;
 	
 	if (right)
@@ -234,7 +232,7 @@ Player.prototype.update = function(deltaTime)
 
 Player.prototype.draw = function()
 {
-	this.sprite.draw(context, this.position.x - worldOffsetX, this.position.y);
+	this.sprite.draw(context, this.position.x, this.position.y);
 }
 
 

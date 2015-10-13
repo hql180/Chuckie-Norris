@@ -62,19 +62,11 @@ var TILESET_COUNT_X = 14;
 // rows
 var TILESET_COUNT_Y = 14;
 
-
-
 // LAYER CONSTANTS
 var LAYER_COUNT = 3;
 var LAYER_BACKGROUND = 0;
 var LAYER_PLATFORMS = 1;
 var LAYER_LADDERS = 2;
-// not drawing enemy layer because don't want to draw markers / add collision with object
-
-var enemies = [];
-
-var LAYER_OBJECT_ENEMIES = 3;
-var LAYER_OBJECT_TRIGGERS = 4;
 
 // applying forces
 // setting meter
@@ -92,16 +84,10 @@ var FRICTION = MAXDX * 6;
 // large jump impulse
 var JUMP = METER * 1500;
 
-// enemy stuff
-var ENEMY_MAXDX = METER * 5;
-var ENEMY_ACCEL = ENEMY_MAXDX * 2;
-
 // gamestate constants
 var STATE_SPLASH = 0;
 var STATE_GAME = 1;
 var STATE_GAMEOVER = 2;
-
-var bullets = [];
 
 var player = new Player();
 var keyboard = new Keyboard();
@@ -113,18 +99,6 @@ var sfxFire;
 // loading tileset image for use
 var tileset = document.createElement("img");
 tileset.src = "tileset.png";
-
-// COLLISION CHECKS
-function intersects(x1, y1, w1, h1, x2, y2, w2, h2)
-{
-	if(y2 + h2 < y1 ||
-		x2 + w2 < x1 ||
-		y2 > y1 + h1)
-		{
-			return false;
-		}
-		return true;
-}
 
 // collision maps
 var cells = []; // array to hold collision data
@@ -156,35 +130,6 @@ function initialize()
 				}
 				idx++;
 			}
-		}
-	}
-	
-	// ADDING ENEMIES
-	idx = 0;
-	for(var y = 0; y < level1.layers[LAYER_OBJECT_ENEMIES].height; y++)
-	{
-		for(var x = 0; x < level1.layers[LAYER_OBJECT_ENEMIES].width; x++)
-		{
-			if(level1.layers[LAYER_OBJECT_ENEMIES].data[idx] != 0)
-			{
-				var px = tileToPixel(x);
-				var py = tileToPixel(y);
-				var e = new Enemy(px, py);
-				enemies.push(e);
-			}
-			idx++;
-		}
-	}
-	
-
-	
-	// adding player x enemy collision
-	for(var i=0; i<enemies.length; i++)
-	{
-		if(intersects(player.position.x, player.position.y, TILE, TILE, 
-						enemies[i].x, enemies[i].y, TILE, TILE) == true)
-		{
-			player.alive = false;
 		}
 	}
 	
@@ -249,54 +194,30 @@ function bound(value, min, max)
 	return value;
 }
 
-var worldOffsetX =0;
+// drawmap function
 function drawMap()
 {
- var startX = -1;
- var maxTiles = Math.floor(SCREEN_WIDTH / TILE) + 2;
- var tileX = pixelToTile(player.position.x);
- var offsetX = TILE + Math.floor(player.position.x%TILE);
-
- startX = tileX - Math.floor(maxTiles / 2);
-
- if(startX < -1)
- {
-	 startX = 0;
-	 offsetX = 0;
- }
- if(startX > MAP.tw - maxTiles)
- {
-	 startX = MAP.tw - maxTiles + 1;
-	 offsetX = TILE;
- }
-	worldOffsetX = startX * TILE + offsetX;
-	
-	for( var layerIdx=0; layerIdx < LAYER_COUNT; layerIdx++ )
- {
-	for( var y = 0; y < level1.layers[layerIdx].height; y++ )
- {
-		var idx = y * level1.layers[layerIdx].width + startX;
-		for( var x = startX; x < startX + maxTiles; x++ )
- {
-			if( level1.layers[layerIdx].data[idx] != 0 )
-			{
-			 // the tiles in the Tiled map are base 1 (meaning a value of 0 means no tile),
-			 // so subtract one from the tileset id to get the correct tile
-			 var tileIndex = level1.layers[layerIdx].data[idx] - 1;
-			 var sx = TILESET_PADDING + (tileIndex % TILESET_COUNT_X) *
-			(TILESET_TILE + TILESET_SPACING);
-			 var sy = TILESET_PADDING + (Math.floor(tileIndex / TILESET_COUNT_Y)) *
-			(TILESET_TILE + TILESET_SPACING);
-			 context.drawImage(tileset, sx, sy, TILESET_TILE, TILESET_TILE,
-			(x-startX)*TILE - offsetX, (y-1)*TILE, TILESET_TILE, TILESET_TILE);
-			}
-			idx++;
-			}
-		}
-	}
+	 for(var layerIdx=0; layerIdx<LAYER_COUNT; layerIdx++)
+	 {
+		 var idx = 0;
+		 for( var y = 0; y < level1.layers[layerIdx].height; y++ )
+		 {
+			 for( var x = 0; x < level1.layers[layerIdx].width; x++ )
+			 {
+				 if( level1.layers[layerIdx].data[idx] != 0 )
+				 {
+					 // the tiles in the Tiled map are base 1 (meaning a value of 0 means no tile), so subtract one from the tileset id to get the
+					 // correct tile
+					 var tileIndex = level1.layers[layerIdx].data[idx] - 1;
+					 var sx = TILESET_PADDING + (tileIndex % TILESET_COUNT_X) * (TILESET_TILE + TILESET_SPACING);
+					 var sy = TILESET_PADDING + (Math.floor(tileIndex / TILESET_COUNT_Y)) * (TILESET_TILE + TILESET_SPACING);
+					 context.drawImage(tileset, sx, sy, TILESET_TILE, TILESET_TILE, x*TILE, (y-1)*TILE, TILESET_TILE, TILESET_TILE);
+				 }
+				 idx++;
+			 }
+		 }
+	 }
 }
-
-
 
 
 function run()
@@ -304,22 +225,14 @@ function run()
 	context.fillStyle = "#ccc";		
 	context.fillRect(0, 0, canvas.width, canvas.height);
 	
+	// calling drawmap function to drawMap
+	drawMap();
+	
 	var deltaTime = getDeltaTime();
 	
-	// update player before drawing map
+	// updating player and drawing
 	player.update(deltaTime);
-	
-	drawMap();
 	player.draw();
-	
-	//drawing enemies
-	for(var i=0; i<enemies.length; i++)
-	{
-		enemies[i].update(deltaTime);
-		enemies[i].draw();
-	}
-	
-	
 	
 	// update the frame counter 
 	fpsTime += deltaTime;
