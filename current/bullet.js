@@ -19,7 +19,7 @@ var Bullet = function(x, y, moveRight)
 
 Bullet.prototype.update = function(deltaTime)
 {
-	this.sprite.update(dt);
+	this.sprite.update(deltaTime);
 	this.position.x = Math.floor(this.position.x + (deltaTime * this.velocity.x));
 }
 

@@ -108,6 +108,10 @@ var bullets = [];
 var splash = document.createElement("img");
 splash.src = "splash.png"
 
+// lives image
+var chuckFace = document.createElement("img");
+chuckFace.src = "ChuckFace.png"
+
 var player = new Player();
 var keyboard = new Keyboard();
 var lives;
@@ -132,6 +136,7 @@ function intersects(x1, y1, w1, h1, x2, y2, w2, h2)
 {
 	if(y2 + h2 < y1 ||
 		x2 + w2 < x1 ||
+		x2 > x1 + w1 ||
 		y2 > y1 + h1)
 		{
 			return false;
@@ -217,7 +222,7 @@ function initialize()
 	// sound stuff
 	musicBackground = new Howl(
 	{
-		urls: ["background.oog"],
+		urls: ["background.ogg"],
 		leep: true,
 		buffer: true,
 		volume: .5
@@ -357,31 +362,38 @@ function gameStateGame(deltaTime)
 	}
 	
 
-	for(var j=0; j<bullets.length; j++)
+	for(var i=0; i<bullets.length; i++)
 	{
-		bullets[j].update(deltaTime);
-		bullets[j].draw();
+		bullets[i].update(deltaTime);
+		bullets[i].draw();
 	}
 	
-	
+		
 	// adding bullet x enemies collision
 	
-	var hit = false;
-	for(var j=0; j<bullets.lenth; j++)
+	var hit=false;
+	for(var i=0; i<bullets.length; i++)
 	{
-		for(var i=0; i<enemies.length; i++)
+		bullets[i].update(deltaTime);
+		if( bullets[i].position.x -	worldOffsetX < 0 ||
+			bullets[i].position.x -	worldOffsetX > SCREEN_WIDTH)
 		{
-			if(intersects(enemies[i].x, enemies[i].y, TILE, TILE,
-							bullets[j].x, bullets[j].y, TILE, TILE) == true)
+			hit = true;
+		}
+		for(var j=0; j<enemies.length; j++)
+		{
+			if(intersects( bullets[i].position.x, bullets[i].position.y, TILE, TILE,
+							enemies[j].position.x, enemies[j].position.y, TILE, TILE) == true)
 			{
-				score += 50;
+				// kill both the bullet and the enemy
+				enemies.splice(j, 1);
 				hit = true;
-				enemies.splice(i, 1);
-				bullets.splice(j, 1);
+				// increment the player score
+				score += 50;
 				break;
 			}
 		}
-		if(hit == true)
+		if(hit == true) 
 		{
 			bullets.splice(i, 1);
 			break;
@@ -393,10 +405,19 @@ function gameStateGame(deltaTime)
 	for(var i=0; i<enemies.length; i++)
 	{
 		if(intersects(player.position.x, player.position.y, TILE, TILE, 
-						enemies[i].x, enemies[i].y, TILE, TILE) == true)
+						enemies[i].position.x, enemies[i].position.y, TILE, TILE) == true)
 		{
-			lives += -1;
+			lives -= 1;
+			enemies.splice(i, 1);
+			break;
+			
 		}
+	}
+	
+	if(player.position.y > SCREEN_HEIGHT)
+	{
+		lives -= 1;
+		player = new Player;
 	}
 	
 	if(lives == 0)
@@ -419,6 +440,11 @@ function gameStateGame(deltaTime)
 	context.font = "14px Arial";
 	context.fillText("Score: " + score, 5, 40, 100);
 	
+	for(var i=0; i<lives; i++)
+	{
+		context.drawImage(chuckFace, SCREEN_WIDTH - chuckFace.width*4 + ((chuckFace.width+2)*i), 10);
+	}
+
 	// draw the FPS
 	context.fillStyle = "#f00";
 	context.font="14px Arial";
@@ -430,19 +456,17 @@ function gameStateGameover(deltaTime)
 	context.drawImage(splash, 0, 0);
 	context.fillStyle = "#f00";
 	context.font = "50px Arial";
-	context.fillText("Press space to restart game", 350, 250, 200);
+	context.fillText("GAMEOVER", 350, 250, 200);
 	
-	score = 0;
 	if(keyboard.isKeyDown(keyboard.KEY_SPACE) == true)
 	{
-		gameState = STATE_GAME;
-		player = new Player;
-		score = 0;
+			
 	}
 }
 
 function run(deltaTime)
 {
+	
 	switch(gameState)
 	{
 		case STATE_SPLASH:
