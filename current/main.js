@@ -225,7 +225,8 @@ function initialize()
 		urls: ["background.ogg"],
 		leep: true,
 		buffer: true,
-		volume: .5
+		volume: .5,
+		loop: true
 	});
 	musicBackground.play();
 	

@@ -10,17 +10,26 @@ var Bullet = function(x, y, moveRight)
 	
 	this.velocity = new Vector2();
 	
-	this.moveRight = moveRight;
-	if(this.moveRight = true)
-		this.velocity.set(MAXDX * 2, 0);
-	else 
-		this.velocity.set(-MAXDX * 2, 0);
+	// don't think i need this
+	//this.moveRight = moveRight;
+	//if(this.moveRight = true)
+	//	this.velocity.set(MAXDX * 2, 0);
+	//else 
+	//	this.velocity.set(-MAXDX * 2, 0);
 }
 
 Bullet.prototype.update = function(deltaTime)
 {
 	this.sprite.update(deltaTime);
 	this.position.x = Math.floor(this.position.x + (deltaTime * this.velocity.x));
+}
+
+Bullet.prototype.direction = function(x)
+{
+	if(x == RIGHT)
+		this.velocity.set(MAXDX * 2, 0);
+	else
+		this.velocity.set(-MAXDX * 2, 0);
 }
 
 Bullet.prototype.draw = function()

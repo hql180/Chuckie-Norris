@@ -116,7 +116,7 @@ Player.prototype.update = function(deltaTime)
 		sfxFire.play();
 		this.cooldownTimer = 0.3;
 		var bullet = new Bullet(this.position.x, this.position.y);
-		
+		bullet.direction(this.direction)	;
 		bullets.push(bullet);		
 	}
 	
